@@ -19,8 +19,11 @@ class IsBoardWorkspaceMember(permissions.BasePermission):
       user = request.user,
     ).exists()
 
-class BoardListView(generics.ListAPIView):
-  serializer_class = BoardListSerializer
+class BoardListView(generics.ListCreateAPIView):
+  def get_serializer_class(self):
+    if self.request.method == 'POST':
+      return BoardCreateSerializer
+    return BoardListSerializer
 
   def get_queryset(self):
     return  Board.objects.filter(

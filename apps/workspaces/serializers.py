@@ -35,7 +35,9 @@ class WorkspaceListSerializer(serializers.ModelSerializer):
 
 class WorkspaceDetailSerializer(serializers.ModelSerializer):
   owner = UserMiniSerializer(read_only=True)
-  member = MemberSerializer(read_only=True)
+  members = MemberSerializer(read_only=True)
+
+  slug = serializers.SlugField(read_only=True)
 
   class Meta:
     model= Workspace

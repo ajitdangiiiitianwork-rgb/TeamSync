@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: teamsync_db
+    volumes:
+      - teamsync_postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: teamsync
+      POSTGRES_USER: teamsync_user
+      POSTGRES_PASSWORD: teamsync_password
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teamsync_user -d teamsync"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s   # Give PostgreSQL 30s to finish init
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: teamsync_web
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: "django-insecure-dev-key-change-in-production"
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: teamsync
+      DB_USER: teamsync_user
+      DB_PASSWORD: teamsync_password
+      DB_HOST: db
+      DB_PORT: 5432
+      DEBUG: "True"
+      DJANGO_SETTINGS_MODULE: config.settings.local
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  teamsync_postgres_data:

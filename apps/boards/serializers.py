@@ -19,7 +19,7 @@ class CardSerializer(serializers.ModelSerializer):
   class Meta:
     model = Card
     fields = [
-    'id', 'title', 'description', 'assignee',
+    'id', 'title', 'description', 'assignee', 'list',
     'position', 'priority', 'due_date',
     'comments', 'created_at', 'updated_at'
     ]
@@ -34,18 +34,20 @@ class ListSerializer(serializers.ModelSerializer):
 class BoardListSerializer(serializers.ModelSerializer):
   workspace_name = serializers.CharField(source='workspace.name', read_only=True)
   list_count = serializers.IntegerField(source='lists.count', read_only=True)
+  workspace = serializers.PrimaryKeyRelatedField(read_only=True)
   
   class Meta:
     model = Board
-    fields = ['id', 'name', 'workspace_name', 'list_count', 'created_at']
+    fields = ['id', 'name', 'workspace_name','workspace', 'list_count', 'created_at']
 
 class BoardDetailSerializer(serializers.ModelSerializer):
   workspace_name = serializers.CharField(source='workspace.name', read_only=True)
+  workspace = serializers.PrimaryKeyRelatedField(read_only=True)
   lists = ListSerializer(many=True, read_only=True)
   
   class Meta:
     model = Board
-    fields = ['id', 'name', 'description', 'workspace_name', 'lists', 'created_at', 'updated_at']
+    fields = ['id', 'name', 'description', 'workspace_name', 'workspace','lists', 'created_at', 'updated_at']
 
 class CardMoveSerializer(serializers.Serializer):
   list_id = serializers.IntegerField()

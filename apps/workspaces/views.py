@@ -20,7 +20,8 @@ class IsWorkspaceAdmin(permissions.BasePermission):
     membership = Member.objects.filter(workspace=obj, user=request.user).first()
     return membership is not None and membership.role == 'admin'
 
-class WorkspaceListView(generics.ListAPIView):
+class WorkspaceListView(generics.ListCreateAPIView):
+  permission_classes = [permissions.IsAuthenticated] 
   def get_serializer_class(self):
     if self.request.method == "POST":
       return WorkspaceDetailSerializer
@@ -50,7 +51,7 @@ class WorkspaceDetailView(generics.RetrieveUpdateDestroyAPIView):
   ]
 
   def get_queryset(self):
-    return Workspace.objects.filter(members_user = self.request.user)
+    return Workspace.objects.filter(members__user = self.request.user)
 
   def get_permissions(self):
     # For GET, use existing permissions (IsAuthenticated + IsWorkspaceMember)
