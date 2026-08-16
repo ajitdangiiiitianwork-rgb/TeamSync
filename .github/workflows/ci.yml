@@ -12,11 +12,11 @@ on:
     
 jobs:
   test:
-    runs-on: ubutnu:latest
+    runs-on: ubutnu-latest
 
     services:
       postgres:
-        image: postgre:16-alpine
+        image: postgres:16-alpine
         env:
           POSTGRES_DB: teamsync              # Database name
           POSTGRES_USER: teamsync_user       # Database user
@@ -31,7 +31,7 @@ jobs:
         ports:
           - 5432:5432
         
-        steps:
+      steps:
 
       # ==========================================
       # STEP 1: Checkout Code
