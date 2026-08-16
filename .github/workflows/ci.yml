@@ -31,7 +31,7 @@ jobs:
         ports:
           - 5432:5432
         
-      steps:
+    steps:
 
       # ==========================================
       # STEP 1: Checkout Code
@@ -39,8 +39,8 @@ jobs:
       # This downloads your repository code into the virtual machine.
       # Without this step, the machine has no code to test.
 
-        - name: Checkout code
-          uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       # "uses" means "use a pre-built action from GitHub Marketplace"
       # actions/checkout@v4 is the official GitHub action for downloading code
@@ -53,10 +53,10 @@ jobs:
       # The Ubuntu runner doesn't have Python installed by default.
       # This action installs the Python version you specify.
 
-        - name: Set up Python
-          uses: actions/setup-python@v5
-          with:
-            python-version: '3.12'   # Must match your Dockerfile Python version
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'   # Must match your Dockerfile Python version
 
       # "with" passes parameters to the action
       # python-version: '3.12' tells it to install Python 3.12
@@ -70,10 +70,10 @@ jobs:
       # "run" means "execute this shell command"
       # The | (pipe) character allows multi-line commands
 
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       # WHY --upgrade pip:
       # - Ensures you have the latest pip (avoids install bugs)
@@ -91,19 +91,19 @@ jobs:
       # - Models don't have errors
       # - No missing dependencies
 
-        - name: Django System Check
-          env:
-            # These environment variables are passed to Django
-            # They tell Django to connect to the PostgreSQL service container
-            DB_ENGINE: django.db.backends.postgresql
-            DB_NAME: teamsync
-            DB_USER: teamsync_user
-            DB_PASSWORD: teamsync_password
-            DB_HOST: localhost        # ← "localhost" because service runs on same VM
-            DB_PORT: 5432
-            SECRET_KEY: l0La_ty-27ZKXlOsQHlXk5HBQctsy_ebyjR1cWmWUecgm46UC5AO2kO8rcOH_TtgDUs
-            DJANGO_SETTINGS_MODULE: config.settings.local
-          run: python manage.py check
+      - name: Django System Check
+        env:
+          # These environment variables are passed to Django
+          # They tell Django to connect to the PostgreSQL service container
+          DB_ENGINE: django.db.backends.postgresql
+          DB_NAME: teamsync
+          DB_USER: teamsync_user
+          DB_PASSWORD: teamsync_password
+          DB_HOST: localhost        # ← "localhost" because service runs on same VM
+          DB_PORT: 5432
+          SECRET_KEY: l0La_ty-27ZKXlOsQHlXk5HBQctsy_ebyjR1cWmWUecgm46UC5AO2kO8rcOH_TtgDUs
+          DJANGO_SETTINGS_MODULE: config.settings.local
+        run: python manage.py check
 
       # KEY DIFFERENCE FROM DOCKER:
       # In docker-compose, DB_HOST is "db" (the service name)
@@ -117,17 +117,17 @@ jobs:
       # Creates database tables based on your models.
       # Without this, tests will fail because tables don't exist.
 
-        - name: Run Migrations
-          env:
-            DB_ENGINE: django.db.backends.postgresql
-            DB_NAME: teamsync
-            DB_USER: teamsync_user
-            DB_PASSWORD: teamsync_password
-            DB_HOST: localhost
-            DB_PORT: 5432
-            SECRET_KEY: l0La_ty-27ZKXlOsQHlXk5HBQctsy_ebyjR1cWmWUecgm46UC5AO2kO8rcOH_TtgDUs
-            DJANGO_SETTINGS_MODULE: config.settings.local
-          run: python manage.py migrate
+      - name: Run Migrations
+        env:
+          DB_ENGINE: django.db.backends.postgresql
+          DB_NAME: teamsync
+          DB_USER: teamsync_user
+          DB_PASSWORD: teamsync_password
+          DB_HOST: localhost
+          DB_PORT: 5432
+          SECRET_KEY: l0La_ty-27ZKXlOsQHlXk5HBQctsy_ebyjR1cWmWUecgm46UC5AO2kO8rcOH_TtgDUs
+          DJANGO_SETTINGS_MODULE: config.settings.local
+        run: python manage.py migrate
 
       # WHY RUN MIGRATIONS IN CI:
       # - Ensures your migrations actually work
@@ -141,35 +141,35 @@ jobs:
       # This is the MAIN EVENT — your Django test suite executes here.
       # If any test fails, the entire pipeline fails and turns red.
 
-        - name: Run Tests
-          env:
-            DB_ENGINE: django.db.backends.postgresql
-            DB_NAME: teamsync
-            DB_USER: teamsync_user
-            DB_PASSWORD: teamsync_password
-            DB_HOST: localhost
-            DB_PORT: 5432
-            SECRET_KEY: l0La_ty-27ZKXlOsQHlXk5HBQctsy_ebyjR1cWmWUecgm46UC5AO2kO8rcOH_TtgDUs
-            DJANGO_SETTINGS_MODULE: config.settings.local
-          run: python manage.py test
+      - name: Run Tests
+        env:
+          DB_ENGINE: django.db.backends.postgresql
+          DB_NAME: teamsync
+          DB_USER: teamsync_user
+          DB_PASSWORD: teamsync_password
+          DB_HOST: localhost
+          DB_PORT: 5432
+          SECRET_KEY: l0La_ty-27ZKXlOsQHlXk5HBQctsy_ebyjR1cWmWUecgm46UC5AO2kO8rcOH_TtgDUs
+          DJANGO_SETTINGS_MODULE: config.settings.local
+        run: python manage.py test
 
-      # WHY USE POSTGRESQL FOR TESTS (NOT SQLITE):
-      # - Tests run against the SAME database as production
-      # - Catches PostgreSQL-specific bugs (e.g., JSONField, full-text search)
-      # - Ensures migrations work on PostgreSQL
+    # WHY USE POSTGRESQL FOR TESTS (NOT SQLITE):
+    # - Tests run against the SAME database as production
+    # - Catches PostgreSQL-specific bugs (e.g., JSONField, full-text search)
+    # - Ensures migrations work on PostgreSQL
 
 
-      # ==========================================
-      # STEP 7: Code Formatting Check (Optional)
-      # ==========================================
-      # This checks if your code follows PEP 8 style guidelines.
-      # It doesn't change your code — it just fails if code is messy.
+    # ==========================================
+    # STEP 7: Code Formatting Check (Optional)
+    # ==========================================
+    # This checks if your code follows PEP 8 style guidelines.
+    # It doesn't change your code — it just fails if code is messy.
 
-        - name: Check Code Formatting
-          run: |
-            pip install black flake8
-            black --check .
-            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Check Code Formatting
+        run: |
+          pip install black flake8
+          black --check .
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
       # black --check .  → Fails if code isn't formatted with Black
       # flake8 ...       → Checks for syntax errors and common bugs
