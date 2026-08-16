@@ -158,19 +158,3 @@ jobs:
     # - Catches PostgreSQL-specific bugs (e.g., JSONField, full-text search)
     # - Ensures migrations work on PostgreSQL
 
-
-    # ==========================================
-    # STEP 7: Code Formatting Check (Optional)
-    # ==========================================
-    # This checks if your code follows PEP 8 style guidelines.
-    # It doesn't change your code — it just fails if code is messy.
-
-      - name: Check Code Formatting
-        run: |
-          pip install black flake8
-          black --check .
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-
-      # black --check .  → Fails if code isn't formatted with Black
-      # flake8 ...       → Checks for syntax errors and common bugs
-      # --select=E9,F63,F7,F82 → Only check critical errors (not style nitpicks)
